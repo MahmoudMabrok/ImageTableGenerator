@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/markdown-generator/static/css/main.9a406573.css",
+    "main.js": "/markdown-generator/static/js/main.ae38fb4a.js",
+    "index.html": "/markdown-generator/index.html",
+    "main.9a406573.css.map": "/markdown-generator/static/css/main.9a406573.css.map",
+    "main.ae38fb4a.js.map": "/markdown-generator/static/js/main.ae38fb4a.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9a406573.css",
+    "static/js/main.ae38fb4a.js"
+  ]
+}
