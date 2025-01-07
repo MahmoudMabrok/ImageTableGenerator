@@ -1,6 +1,6 @@
 {
   "name": "markdown-generator",
-  "homepage": "https://mahmoudmabrok.github.io/markdown-generator",
+  "homepage": "https://mahmoudmabrok.github.io/MarkdownTableGenerator/",
   "version": "1.0.0",
   "dependencies": {
     "autoprefixer": "10.4.14",
