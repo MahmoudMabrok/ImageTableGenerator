@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PlusCircle, Trash2, ImagePlus, Copy } from "lucide-react";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 interface ImageData {
   url: string;
@@ -43,27 +44,42 @@ export default function MarkdownGenerator() {
     try {
       const clipboardText = await navigator.clipboard.readText();
 
-      // github sometimes use []() annotation and other uses <img> when upload files, so we 
-      // need to handle both cases. 
+      // github sometimes use []() annotation and other uses <img> when upload files, so we
+      // need to handle both cases.
       const regex = /!\[(.*?)\]\((.*?)\)|<img[^>]+alt="(.*?)"[^>]+src="(.*?)"/g;
 
       // Parse the markdown and extract title and URL
       const newImages: ImageData[] = [];
       let match;
       while ((match = regex.exec(clipboardText)) !== null) {
-        if (match[1] && match[2]){
-          newImages.push({ title: match[1], url:match[2]});
-        }else if (match[3] && match[4])
-        newImages.push({ title: match[3], url:match[4]});
+        if (match[1] && match[2]) {
+          newImages.push({ title: match[1], url: match[2] });
+        } else if (match[3] && match[4])
+          newImages.push({ title: match[3], url: match[4] });
       }
 
-      setImages((prev) => prev.concat(newImages));
+      if (newImages.length > 0) {
+        setImages((prev) => prev.concat(newImages));
+      } else {
+        alert(
+          "No images data existing in pasted data, we support ![]() and <img alt src>"
+        );
+      }
     } catch (error) {
       console.error("Failed to read clipboard:", error);
       alert(
         "Failed to read clipboard. Please ensure you have granted clipboard permissions."
       );
     }
+  };
+
+  const handleDragEnd = (result: any) => {
+    if (!result.destination) return; // Dropped outside the list
+
+    const reorderedImages = Array.from(images);
+    const [removed] = reorderedImages.splice(result.source.index, 1);
+    reorderedImages.splice(result.destination.index, 0, removed);
+    setImages(reorderedImages);
   };
 
   const generateMarkdown = () => {
@@ -145,34 +161,71 @@ export default function MarkdownGenerator() {
           </div>
 
           <div className="space-y-4">
-            {images.map((image, index) => (
-              <div key={index} className="flex gap-4 items-start">
-                <div className="flex-1">
-                  <input
-                    type="url"
-                    placeholder="Image URL"
-                    value={image.url}
-                    onChange={(e) => updateImage(index, "url", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md mb-2"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Image Title"
-                    value={image.title}
-                    onChange={(e) =>
-                      updateImage(index, "title", e.target.value)
-                    }
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-                <button
-                  onClick={() => removeImage(index)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded-md"
-                >
-                  <Trash2 className="w-5 h-5" />
-                </button>
-              </div>
-            ))}
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="image-list">
+                {(provided) => (
+                  <ul
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    style={{ listStyle: "none", padding: 0 }}
+                  >
+                    {images.map((image, index) => (
+                      <Draggable
+                        key={index}
+                        draggableId={`image-${index}`}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <li
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            style={{
+                              padding: "8px",
+                              margin: "8px 0",
+                              border: "1px solid #ccc",
+                              borderRadius: "4px",
+                              backgroundColor: "#f9f9f9",
+                              ...provided.draggableProps.style,
+                            }}
+                          >
+                            <div key={index} className="flex gap-4 items-start">
+                              <div className="flex-1">
+                                <input
+                                  type="url"
+                                  placeholder="Image URL"
+                                  value={image.url}
+                                  onChange={(e) =>
+                                    updateImage(index, "url", e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 border rounded-md mb-2"
+                                />
+                                <input
+                                  type="text"
+                                  placeholder="Image Title"
+                                  value={image.title}
+                                  onChange={(e) =>
+                                    updateImage(index, "title", e.target.value)
+                                  }
+                                  className="w-full px-3 py-2 border rounded-md"
+                                />
+                              </div>
+                              <button
+                                onClick={() => removeImage(index)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded-md"
+                              >
+                                <Trash2 className="w-5 h-5" />
+                              </button>
+                            </div>
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           </div>
 
           <div className="mt-6 flex gap-4">
