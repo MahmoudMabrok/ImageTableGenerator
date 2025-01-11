@@ -11,17 +11,17 @@ will need to formate data into suitable markdown and use it, so idea came to aut
 - [x] add images and titles manually
 - [x] add images from clipboard (handle two representation from github) 
 - [ ] render content on page as check
+- [ ] reorder feature
+- [ ] handle non completed columns
   
 ## Demo: 
-| when click add image button  | Result After generate |
+| start | when click add image button |
 | --- | --- |
-| ![add image](https://github.com/user-attachments/assets/9dd6012e-4942-4841-93ec-8a717bf89eb9) | ![final](https://github.com/user-attachments/assets/f6345f3b-94f0-46ad-8fbb-a167309cc5c8) |
+| ![start](https://github.com/user-attachments/assets/702a8147-f64e-4a2b-b9ac-d7f3599febfe) | ![add image](https://github.com/user-attachments/assets/6b51333c-28ce-4b54-80c0-2b7a5de67f92) |
 
-| start | validation of data |
+| validation of data | Result After generate |
 | --- | --- |
-| ![start](https://github.com/user-attachments/assets/1e250d2b-ad1d-486d-9a60-31e714af16f3) | ![validation](https://github.com/user-attachments/assets/f789d5c5-ab2e-4129-83a1-6645aaeaeccb) |
-
-
+| ![validation](https://github.com/user-attachments/assets/3574356d-8e4c-4c4e-b993-3c929b82dd10) | ![final](https://github.com/user-attachments/assets/2efa495c-6a91-4833-8f45-85ee15298370) |
 
 
 ## Another Sample 
