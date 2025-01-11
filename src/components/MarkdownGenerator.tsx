@@ -43,15 +43,18 @@ export default function MarkdownGenerator() {
     try {
       const clipboardText = await navigator.clipboard.readText();
 
-      const regex = /!\[(.*?)\]\((.*?)\)/g;
+      // github sometimes use []() annotation and other uses <img> when upload files, so we 
+      // need to handle both cases. 
+      const regex = /!\[(.*?)\]\((.*?)\)|<img[^>]+alt="(.*?)"[^>]+src="(.*?)"/g;
 
       // Parse the markdown and extract title and URL
       const newImages: ImageData[] = [];
       let match;
       while ((match = regex.exec(clipboardText)) !== null) {
-        const title = match[1]; // Captured group for the title
-        const url = match[2]; // Captured group for the URL
-        newImages.push({ title, url});
+        if (match[1] && match[2]){
+          newImages.push({ title: match[1], url:match[2]});
+        }else if (match[3] && match[4])
+        newImages.push({ title: match[3], url:match[4]});
       }
 
       setImages((prev) => prev.concat(newImages));
