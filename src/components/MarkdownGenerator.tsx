@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { PlusCircle, Trash2, ImagePlus, Copy } from 'lucide-react';
+import { useState } from "react";
+import { PlusCircle, Trash2, ImagePlus, Copy } from "lucide-react";
 
 interface ImageData {
   url: string;
@@ -9,17 +9,21 @@ interface ImageData {
 export default function MarkdownGenerator() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [columns, setColumns] = useState<number>(2);
-  const [markdownResult, setMarkdownResult] = useState<string>('');
+  const [markdownResult, setMarkdownResult] = useState<string>("");
 
   const addImage = () => {
-    setImages([...images, { url: '', title: '' }]);
+    setImages([...images, { url: "", title: "" }]);
   };
 
   const removeImage = (index: number) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const updateImage = (index: number, field: keyof ImageData, value: string) => {
+  const updateImage = (
+    index: number,
+    field: keyof ImageData,
+    value: string
+  ) => {
     const newImages = [...images];
     newImages[index] = { ...newImages[index], [field]: value };
     setImages(newImages);
@@ -29,57 +33,83 @@ export default function MarkdownGenerator() {
   const isFormValid = () => {
     return (
       images.length > 0 && // At least one image is added
-      images.every((image) => image.url.trim() !== '' && image.title.trim() !== '') // All fields are filled
+      images.every(
+        (image) => image.url.trim() !== "" && image.title.trim() !== ""
+      ) // All fields are filled
     );
+  };
+
+  const loadImagesFromClipboard = async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+
+      const regex = /!\[(.*?)\]\((.*?)\)/g;
+
+      // Parse the markdown and extract title and URL
+      const newImages: ImageData[] = [];
+      let match;
+      while ((match = regex.exec(clipboardText)) !== null) {
+        const title = match[1]; // Captured group for the title
+        const url = match[2]; // Captured group for the URL
+        newImages.push({ title, url});
+      }
+
+      setImages((prev) => prev.concat(newImages));
+    } catch (error) {
+      console.error("Failed to read clipboard:", error);
+      alert(
+        "Failed to read clipboard. Please ensure you have granted clipboard permissions."
+      );
+    }
   };
 
   const generateMarkdown = () => {
     if (!isFormValid()) return;
-  
+
     const rows = Math.ceil(images.length / columns);
-    let markdown = '';
-  
+    let markdown = "";
+
     for (let row = 0; row < rows; row++) {
       // Calculate the number of images in this row
       const startIndex = row * columns;
       const endIndex = startIndex + columns;
       const rowImages = images.slice(startIndex, endIndex);
-  
+
       // Generate the header row for this row
-      markdown += '|';
+      markdown += "|";
       rowImages.forEach((image) => {
         markdown += ` ${image.title} |`;
       });
       // Add empty headers if there are fewer images than columns
       for (let i = rowImages.length; i < columns; i++) {
-        markdown += ' |';
+        markdown += " |";
       }
-      markdown += '\n';
-  
+      markdown += "\n";
+
       // Generate the header alignment row for this row
-      markdown += '|';
+      markdown += "|";
       rowImages.forEach(() => {
         markdown += ` --- |`;
       });
       // Add empty alignment cells if there are fewer images than columns
       for (let i = rowImages.length; i < columns; i++) {
-        markdown += ' --- |';
+        markdown += " --- |";
       }
-      markdown += '\n';
-  
+      markdown += "\n";
+
       // Generate the image row for this row
-      markdown += '|';
+      markdown += "|";
       rowImages.forEach((image) => {
         // Use plain markdown syntax for images
         markdown += ` ![${image.title}](${image.url}) |`;
       });
       // Add empty cells if there are fewer images than columns
       for (let i = rowImages.length; i < columns; i++) {
-        markdown += ' |';
+        markdown += " |";
       }
-      markdown += '\n\n'; // Add an extra newline for spacing between rows
+      markdown += "\n\n"; // Add an extra newline for spacing between rows
     }
-  
+
     setMarkdownResult(markdown);
   };
 
@@ -104,7 +134,9 @@ export default function MarkdownGenerator() {
               type="number"
               min="1"
               value={columns}
-              onChange={(e) => setColumns(Math.max(1, parseInt(e.target.value) || 1))}
+              onChange={(e) =>
+                setColumns(Math.max(1, parseInt(e.target.value) || 1))
+              }
               className="w-24 px-3 py-2 border rounded-md"
             />
           </div>
@@ -117,14 +149,16 @@ export default function MarkdownGenerator() {
                     type="url"
                     placeholder="Image URL"
                     value={image.url}
-                    onChange={(e) => updateImage(index, 'url', e.target.value)}
+                    onChange={(e) => updateImage(index, "url", e.target.value)}
                     className="w-full px-3 py-2 border rounded-md mb-2"
                   />
                   <input
                     type="text"
                     placeholder="Image Title"
                     value={image.title}
-                    onChange={(e) => updateImage(index, 'title', e.target.value)}
+                    onChange={(e) =>
+                      updateImage(index, "title", e.target.value)
+                    }
                     className="w-full px-3 py-2 border rounded-md"
                   />
                 </div>
@@ -145,6 +179,12 @@ export default function MarkdownGenerator() {
             >
               <PlusCircle className="w-5 h-5" />
               Add Image
+            </button>
+            <button
+              onClick={loadImagesFromClipboard}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Paste Images
             </button>
             <button
               onClick={generateMarkdown}
