@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { PlusCircle, Trash2, ImagePlus, Copy } from "lucide-react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import DOMPurify from "dompurify"; // For sanitizing HTML
 
 interface ImageData {
   url: string;
   title: string;
 }
 
-export default function MarkdownGenerator() {
+export default function TableGenerator() {
   const [images, setImages] = useState<ImageData[]>([]);
   const [columns, setColumns] = useState<number>(2);
-  const [markdownResult, setMarkdownResult] = useState<string>("");
+  const [htmlResult, setHtmlResult] = useState<string>("");
 
   const addImage = () => {
     setImages([...images, { url: "", title: "" }]);
@@ -82,58 +83,48 @@ export default function MarkdownGenerator() {
     setImages(reorderedImages);
   };
 
-  const generateMarkdown = () => {
+  const generateHtmlTable = () => {
     if (!isFormValid()) return;
 
     const rows = Math.ceil(images.length / columns);
-    let markdown = "";
+    const columnWidth = 100 / columns;
+
+    let html = `<table style="width: 100%; border-collapse: collapse;">`;
 
     for (let row = 0; row < rows; row++) {
-      // Calculate the number of images in this row
       const startIndex = row * columns;
       const endIndex = startIndex + columns;
       const rowImages = images.slice(startIndex, endIndex);
 
-      // Generate the header row for this row
-      markdown += "|";
+      // Header row
+      html += `<tr>`;
       rowImages.forEach((image) => {
-        markdown += ` ${image.title} |`;
+        html += `<th style="width: ${columnWidth}%; text-align: center; border: 1px solid #ccc; padding: 8px;">${image.title}</th>`;
       });
-      // Add empty headers if there are fewer images than columns
       for (let i = rowImages.length; i < columns; i++) {
-        markdown += " |";
+        html += `<th style="width: ${columnWidth}%; text-align: center; border: 1px solid #ccc; padding: 8px;"></th>`;
       }
-      markdown += "\n";
+      html += `</tr>`;
 
-      // Generate the header alignment row for this row
-      markdown += "|";
-      rowImages.forEach(() => {
-        markdown += ` --- |`;
-      });
-      // Add empty alignment cells if there are fewer images than columns
-      for (let i = rowImages.length; i < columns; i++) {
-        markdown += " --- |";
-      }
-      markdown += "\n";
-
-      // Generate the image row for this row
-      markdown += "|";
+      // Image row
+      html += `<tr>`;
       rowImages.forEach((image) => {
-        // Use plain markdown syntax for images
-        markdown += ` ![${image.title}](${image.url}) |`;
+        html += `<td style="width: ${columnWidth}%; text-align: center; border: 1px solid #ccc; padding: 8px;"><img src="${image.url}" alt="${image.title}" style="max-width: 100%; height: auto;" /></td>`;
       });
-      // Add empty cells if there are fewer images than columns
       for (let i = rowImages.length; i < columns; i++) {
-        markdown += " |";
+        html += `<td style="width: ${columnWidth}%; text-align: center; border: 1px solid #ccc; padding: 8px;"></td>`;
       }
-      markdown += "\n\n"; // Add an extra newline for spacing between rows
+      html += `</tr>`;
     }
 
-    setMarkdownResult(markdown);
+    html += `</table>`;
+
+    // Sanitize the HTML before setting it
+    setHtmlResult(DOMPurify.sanitize(html));
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(markdownResult);
+    navigator.clipboard.writeText(htmlResult);
   };
 
   return (
@@ -142,7 +133,7 @@ export default function MarkdownGenerator() {
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h1 className="text-2xl font-bold mb-6 flex items-center gap-2">
             <ImagePlus className="w-6 h-6" />
-            Markdown Image Table Generator
+            Image Table Generator
           </h1>
 
           <div className="mb-6">
@@ -243,19 +234,19 @@ export default function MarkdownGenerator() {
               Paste Images
             </button>
             <button
-              onClick={generateMarkdown}
+              onClick={generateHtmlTable}
               disabled={!isFormValid()} // Disable the button if the form is invalid
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Generate Markdown.
+              Generate.
             </button>
           </div>
         </div>
 
-        {markdownResult && (
+        {htmlResult && (
           <div className="bg-white p-6 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Generated Markdown</h2>
+              <h2 className="text-xl font-semibold">Generated HTML Table</h2>
               <button
                 onClick={copyToClipboard}
                 className="flex items-center gap-2 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
@@ -264,9 +255,14 @@ export default function MarkdownGenerator() {
                 Copy
               </button>
             </div>
-            <pre className="bg-gray-50 p-4 rounded-md overflow-x-auto whitespace-pre-wrap">
-              {markdownResult}
-            </pre>
+            <div
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlResult) }}
+              style={{
+                marginTop: "20px",
+                border: "1px solid #ccc",
+                padding: "10px",
+              }}
+            />
           </div>
         )}
       </div>
