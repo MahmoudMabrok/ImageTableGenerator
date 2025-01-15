@@ -11,7 +11,7 @@ will need to formate data into suitable markdown and use it, so idea came to aut
 - [x] add images and titles manually
 - [x] add images from clipboard (handle two representation from github) 
 - [ ] render content on page as check
-- [ ] reorder feature
+- [x] reorder feature
 - [ ] handle non completed columns
   
 ## Demo: 
