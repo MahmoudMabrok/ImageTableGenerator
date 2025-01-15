@@ -153,7 +153,7 @@ export default function TableGenerator() {
 
           <div className="space-y-4">
             <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="image-list">
+              <Droppable droppableId="image">
                 {(provided) => (
                   <ul
                     {...provided.droppableProps}
