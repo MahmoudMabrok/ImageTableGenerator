@@ -1,9 +1,9 @@
-import MarkdownGenerator from './components/MarkdownGenerator';
+import TableGenerator from './components/TableGenerator';
 
 function App() {
   return (
     <div>
-      <MarkdownGenerator />
+      <TableGenerator />
     </div>
   );
 }
