@@ -1,5 +1,5 @@
 # ImageTableGenerator
-Sample tool to generate Image Table with titles.
+Simple tool to generate Image Table with titles.
 
 
 ## Motiviation 
